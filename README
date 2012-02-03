@@ -1,1 +1,22 @@
-Working on this during lunch breaks, originally on jsfiddle.net
+Working on this during lunch breaks, originally on jsfiddle.net: http://jsfiddle.net/jdbevan/v4cux/207/
+
+Minified using Google Closure Compiler: http://closure-compiler.appspot.com/home
+
+Dependent on jQuery (for now)
+
+// DONE: better randomness (when creating a piece assign a probability and use that probability to select a piece)
+
+// TODO: detect multiple pressing of z and increase speed more
+// TODO: remove jQuery dependency
+// TODO: new line at top is different colour - ie different level
+// TODO: pause/restart buttons
+// TODO: tidy up more - jslint
+// TODO: create grid when called, not require HTML/CSS - http://stackoverflow.com/questions/7122919/create-new-not-change-stylesheets-using-jquery
+// TODO: bonus points for same color rows and majority color rows
+// TODO: more pieces
+// TODO: drop next piece before current stops... update activePiece later
+// TODO: options input
+// TODO: AI: pieces change, behaviour watching (if you win rows using one piece, dont give that piece, if you use Z a lot then speed up a lot, randomly speed up and slow down, drop pieces every now and again, pieces moving up, )
+// TODO: global score board
+// TODO: encouraging hits/feedback
+// TODO: multiplayer tetris: pieces (or string of piece id's) served by server, not client, and scores displayed between the two players
