@@ -17,3 +17,4 @@ Dependent on jQuery (for now)
 // TODO: global score board
 // TODO: encouraging hits/feedback
 // TODO: multiplayer tetris: pieces (or string of piece id's) served by server, not client, and scores displayed between the two players
+// TODO: gameplay statistics
