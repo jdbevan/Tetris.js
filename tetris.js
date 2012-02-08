@@ -52,6 +52,8 @@ var outerTetris = (function() {
                     this.pieces.addPieceWithProbability("L2", [[1,0,0],[1,1,1]], "purple", 0.3);
                     this.pieces.addPieceWithProbability("diagonal", [[1,0],[0,1]], "black", 0.1);
                     this.pieces.addPieceWithProbability("T", [[0,1,0],[1,1,1]], "orange", 0.2);
+                    this.pieces.addPieceWithProbability("jagged1", [[1,1,0],[0,1,1]], "pink", 0.2);
+                    this.pieces.addPieceWithProbability("jagged2", [[0,1,1],[1,1,0]], "rose", 0.2);
                 
                     $(document).keydown(function(e){
                         if (e.keyCode == 82) {
@@ -205,13 +207,13 @@ var outerTetris = (function() {
                         singleColorRow = false;
                     //Top 1/4 of grid gets extra points
                     if (rowNum < this.grid.height/4) {
-                        console.log(this.scoreUnit + " points for " + rowNum + " less than " + (this.grid.height/4));
+                        //console.log(this.scoreUnit + " points for " + rowNum + " less than " + (this.grid.height/4));
                         increment += this.scoreUnit;
                     }
                     //Same color row gets extra points
                     for (var i=0;i<this.grid.width;i++) {
                         var locationColor = $(this.grid.selector + " .row").eq(rowNum).find(".col").eq(i).css('background-color');
-                        console.log(locationColor);
+                        //console.log(locationColor);
                         if (singleColorRow === false){
                             singleColorRow = locationColor;
                         } else if (singleColorRow !== locationColor) {
@@ -221,7 +223,7 @@ var outerTetris = (function() {
                     }
                     if (singleColorRow !== false) {
                         increment += this.scoreUnit;
-                        console.log(this.scoreUnit + " points for single colour row");
+                        //console.log(this.scoreUnit + " points for single colour row");
                     }
                     //Fast row filling gets extra points
                     if (false) {
@@ -467,6 +469,29 @@ var outerTetris = (function() {
                     this.activeShape.loc = newShape.loc;
                     this.displayShape(this.activeShape);
                     return true;
+                },
+                statistics: {
+                    completedRows: [],
+                    pieceOccurences: [],
+                    gameTime: 0,
+                    totalPieces: function() {
+                        return pieceOccurences.length;
+                    },
+                    registerPiece: function(id) {
+                        pieceOccurences[pieceOccurences.length] = {"time": Date.now(), "id": id};
+                    },
+                    pieceDistribution: function() {
+                        //calculate the probability with which the pieces appeared
+                    },
+                    totalCompleteRows: function() {
+                        return completedRows.length;
+                    },
+                    registerCompletedRow: function(rowNum) {
+                        completedRows[completedRows.length] = {"time": Date.now(), "row": rowNum};
+                    },
+                    completedRowDistribution: function() {
+                        //calculate which rows "completed" the most
+                    }
                 },
                 output: function(msg) {
                     $("#tetrisgame #tetrisinfo").html(msg);
