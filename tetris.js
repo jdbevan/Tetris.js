@@ -256,18 +256,21 @@ var outerTetris = (function() {
                                 this.pieces[k].cumulativeProb = (k>0) ? this.pieces[k].prob + this.pieces[k-1].cumulativeProb : this.pieces[k].prob;
                             }
                         }
-                        //debugger;
                     },
                     getPieceProbably: function() {
                         var z = Math.random();
-                        console.log(z);
                         return this.binarySearch(this.pieces.length, 0, z);
                     },
                     binarySearch: function(top, bottom, needle) {
                         var mid;
                         while (top !== bottom) {
                             mid = bottom + Math.floor((top - bottom) / 2);
-                            if (needle < this.pieces[mid].cumulativeProb) {
+                            //Needs >= and <= to handle the case where needle is 0 or 1
+                            if (needle >= this.pieces[mid].cumulativeProb-this.pieces[mid].prob &&
+                                needle <= this.pieces[mid].cumulativeProb) {
+                                top = mid;
+                                break;
+                            } else if (needle < this.pieces[mid].cumulativeProb) {
                                 top = mid;
                             } else {
                                 bottom = mid;
