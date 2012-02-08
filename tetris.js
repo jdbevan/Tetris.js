@@ -236,18 +236,16 @@ var outerTetris = (function() {
                         return this.binarySearch(this.pieces.length, 0, z);
                     },
                     binarySearch: function(top, bottom, needle) {
-                        var mid = bottom + Math.floor((top - bottom) / 2);    
-                        if (top - bottom == 1) {
-                            return this.pieces[top-1];
-                        } else if (needle == this.pieces[mid].cumulativeProb) {
-                            return this.pieces[mid];
-                        } else if (needle < this.pieces[mid].cumulativeProb) {
-                            top = mid;
-                            return this.binarySearch(top, bottom, needle);
-                        } else /*if (needle > this.pieces[mid].cumulativeProb) */ {
-                            bottom = mid;
-                            return this.binarySearch(top, bottom, needle);
+                        var mid;
+                        while (top !== bottom) {
+                            mid = bottom + Math.floor((top - bottom) / 2);
+                            if (needle < this.pieces[mid].cumulativeProb) {
+                                top = mid;
+                            } else {
+                                bottom = mid;
+                            }
                         }
+                        return this.pieces[top];
                     },
                     addPiece: function(name, structure, color) {
                         this.addPieceWithProbability(name, structure, color, 1);
