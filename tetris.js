@@ -43,17 +43,17 @@ var outerTetris = (function() {
                     
                     // set up page
                     $("head").append("<style>#tetrisgame { font-family: arial; }\n#tetrisgrid .row { height: 22px; float: left; clear:both; }\n#tetrisgrid .col { float: left; margin-right: 2px; width: 20px; height: 20px; }</style>");
-                    $("body").append("<div id='tetrisgame'><div>Arrow keys move and rotate.<br>\nZ drops current piece, R resets game.</div>\n<div id='tetrisinfo'></div>\n<div id='tetrisgrid'></div></div>");
+                    $("body").append("<div id='tetrisgame'><div>Arrow keys move and rotate.<br>\nZ drops current shape, R resets game.</div>\n<div id='tetrisinfo'></div>\n<div id='tetrisgrid'></div></div>");
                     
-                    this.pieces.addPieceWithProbability("square", [[1,1],[1,1]], "red", 0.2);
-                    this.pieces.addPieceWithProbability("tower", [[1],[1],[1],[1]], "yellow", 0.15);
-                    this.pieces.addPieceWithProbability("step", [[0,1],[1,1]], "green", 0.1);
-                    this.pieces.addPieceWithProbability("L1", [[0,0,1],[1,1,1]], "blue", 0.3);
-                    this.pieces.addPieceWithProbability("L2", [[1,0,0],[1,1,1]], "purple", 0.3);
-                    this.pieces.addPieceWithProbability("diagonal", [[1,0],[0,1]], "black", 0.1);
-                    this.pieces.addPieceWithProbability("T", [[0,1,0],[1,1,1]], "orange", 0.2);
-                    this.pieces.addPieceWithProbability("jagged1", [[1,1,0],[0,1,1]], "pink", 0.2);
-                    this.pieces.addPieceWithProbability("jagged2", [[0,1,1],[1,1,0]], "rose", 0.2);
+                    this.shapeFactory.addShapeWithProbability("square", [[1,1],[1,1]], "red", 0.2);
+                    this.shapeFactory.addShapeWithProbability("tower", [[1],[1],[1],[1]], "yellow", 0.15);
+                    this.shapeFactory.addShapeWithProbability("step", [[0,1],[1,1]], "green", 0.1);
+                    this.shapeFactory.addShapeWithProbability("L1", [[0,0,1],[1,1,1]], "blue", 0.3);
+                    this.shapeFactory.addShapeWithProbability("L2", [[1,0,0],[1,1,1]], "purple", 0.3);
+                    this.shapeFactory.addShapeWithProbability("diagonal", [[1,0],[0,1]], "black", 0.1);
+                    this.shapeFactory.addShapeWithProbability("T", [[0,1,0],[1,1,1]], "orange", 0.2);
+                    this.shapeFactory.addShapeWithProbability("jagged1", [[1,1,0],[0,1,1]], "pink", 0.2);
+                    this.shapeFactory.addShapeWithProbability("jagged2", [[0,1,1],[1,1,0]], "brown", 0.2);
                 
                     $(document).keydown(function(e){
                         if (e.keyCode == 82) {
@@ -67,44 +67,46 @@ var outerTetris = (function() {
                             tetris.score = 0;
                         }
                         
-                        var changedShape = {
-                            "width": tetris.activeShape.width,
-                            "height": tetris.activeShape.height,
-                            "loc": {"x": tetris.activeShape.loc.x,
-                                    "y": tetris.activeShape.loc.y},
-                            "blocks": tetris.activeShape.blocks,
-                            "rotate": tetris.activeShape.rotate
-                        };
-                        
-                        if (e.keyCode == 37) { 
-                            //left
-                            if (changedShape.loc.x > 0) changedShape.loc.x--;
-                            tetris.moveShapeIfNoCollision(changedShape);
+                        if (tetris.activeShape !== null) {
+                            var changedShape = {
+                                "width": tetris.activeShape.width,
+                                "height": tetris.activeShape.height,
+                                "loc": {"x": tetris.activeShape.loc.x,
+                                        "y": tetris.activeShape.loc.y},
+                                "blocks": tetris.activeShape.blocks,
+                                "rotate": tetris.activeShape.rotate
+                            };
                             
-                        } else if (e.keyCode == 39) {
-                            //right
-                            if (changedShape.loc.x + changedShape.width < tetris.grid.width) changedShape.loc.x++;
-                            tetris.moveShapeIfNoCollision(changedShape);
-                            
-                        } else if (e.keyCode == 38) {
-                            //up - anticlockwise
-                            changedShape.rotate(-1);
-                            tetris.moveShapeIfNoCollision(changedShape);
-                            
-                        } else if (e.keyCode == 40) {
-                            //down - clockwise
-                            changedShape.rotate(1);
-                            tetris.moveShapeIfNoCollision(changedShape);
-                            
-                        } else if (e.keyCode == 90) {
-                            // z - drop
-                            var origY = changedShape.loc.y;
-                            for (changedShape.loc.y=tetris.grid.height-changedShape.height; changedShape.loc.y>origY; changedShape.loc.y--) {
-                                if (!tetris.grid.collisionCheck(changedShape)) {
-                                    break;
+                            if (e.keyCode == 37) { 
+                                //left
+                                if (changedShape.loc.x > 0) changedShape.loc.x--;
+                                tetris.moveShapeIfNoCollision(changedShape);
+                                
+                            } else if (e.keyCode == 39) {
+                                //right
+                                if (changedShape.loc.x + changedShape.width < tetris.grid.width) changedShape.loc.x++;
+                                tetris.moveShapeIfNoCollision(changedShape);
+                                
+                            } else if (e.keyCode == 38) {
+                                //up - anticlockwise
+                                changedShape.rotate(-1);
+                                tetris.moveShapeIfNoCollision(changedShape);
+                                
+                            } else if (e.keyCode == 40) {
+                                //down - clockwise
+                                changedShape.rotate(1);
+                                tetris.moveShapeIfNoCollision(changedShape);
+                                
+                            } else if (e.keyCode == 90) {
+                                // z - drop
+                                var origY = changedShape.loc.y;
+                                for (changedShape.loc.y=tetris.grid.height-changedShape.height; changedShape.loc.y>origY; changedShape.loc.y--) {
+                                    if (!tetris.grid.collisionCheck(changedShape)) {
+                                        break;
+                                    }
                                 }
+                                tetris.moveShapeIfNoCollision(changedShape);
                             }
-                            tetris.moveShapeIfNoCollision(changedShape);
                         }
                     });
                     
@@ -193,7 +195,7 @@ var outerTetris = (function() {
                     this.grid.state = this.grid.drawGrid(gridHeight, gridWidth);
                     return this.grid;
                 },
-                isPieceAt:function(coord){
+                isShapeAt:function(coord){
                     if (coord.x >= 0 && coord.x < this.grid.width && coord.y >= 0 && coord.y < this.grid.height) {
                         return this.grid.state[coord.y][coord.x] == 1;
                     }
@@ -230,14 +232,14 @@ var outerTetris = (function() {
                     }
                     this.score += increment;
                 },
-                pieces: {
-                    addPieceWithProbability: function(name, structure, color, prob) {
+                shapeFactory: {
+                    addShapeWithProbability: function(name, structure, color, prob) {
                         //need to escape the name
-                        this.names[name] = this.pieces.length;
+                        this.names[name] = this.shapes.length;
                         //check prob
                         if (!tetris.isNumber(prob) || prob < 0 || prob > 1) prob = 1;
-                        //create piece
-                        this.pieces[this.pieces.length] = {"color": color,
+                        //create shape
+                        this.shapes[this.shapes.length] = {"color": color,
                                                            "structure":structure,
                                                            "dimensions":{"width":structure[0].length,
                                                                          "height":structure.length},
@@ -248,67 +250,67 @@ var outerTetris = (function() {
                         this.totalGivenProbability += prob;
                         this.total++;
                         
-                        //reset distributed probabilities between added pieces
+                        //reset distributed probabilities between added shapes
                         this.calculateRelativeProbabilities();
                     },
                     calculateRelativeProbabilities: function() {
                         if (this.totalGivenProbability > 0) {
-                            for(var k=0; k<this.pieces.length; k++) {
-                                this.pieces[k].prob = (1 / this.totalGivenProbability) * this.pieces[k].origProb;
-                                this.pieces[k].cumulativeProb = (k>0) ? this.pieces[k].prob + this.pieces[k-1].cumulativeProb : this.pieces[k].prob;
+                            for(var k=0; k<this.shapes.length; k++) {
+                                this.shapes[k].prob = (1 / this.totalGivenProbability) * this.shapes[k].origProb;
+                                this.shapes[k].cumulativeProb = (k>0) ? this.shapes[k].prob + this.shapes[k-1].cumulativeProb : this.shapes[k].prob;
                             }
                         }
                     },
-                    getPieceProbably: function() {
+                    getShapeProbably: function() {
                         var z = Math.random();
-                        return this.binarySearch(this.pieces.length, 0, z);
+                        return this.binarySearch(this.shapes.length, 0, z);
                     },
                     binarySearch: function(top, bottom, needle) {
                         var mid;
                         while (top !== bottom) {
                             mid = bottom + Math.floor((top - bottom) / 2);
                             //Needs >= and <= to handle the case where needle is 0 or 1
-                            if (needle >= this.pieces[mid].cumulativeProb-this.pieces[mid].prob &&
-                                needle <= this.pieces[mid].cumulativeProb) {
+                            if (needle >= this.shapes[mid].cumulativeProb-this.shapes[mid].prob &&
+                                needle <= this.shapes[mid].cumulativeProb) {
                                 top = mid;
                                 break;
-                            } else if (needle < this.pieces[mid].cumulativeProb) {
+                            } else if (needle < this.shapes[mid].cumulativeProb) {
                                 top = mid;
                             } else {
                                 bottom = mid;
                             }
                         }
-                        return this.pieces[top];
+                        return this.shapes[top];
                     },
-                    addPiece: function(name, structure, color) {
-                        this.addPieceWithProbability(name, structure, color, 1);
+                    addShape: function(name, structure, color) {
+                        this.addShapeWithProbability(name, structure, color, 1);
                     },
-                    getPiece: function(reference) {
+                    getShape: function(reference) {
                         if (tetris.isNumber(reference) && reference>=0 && reference<this.total){
                             //lookup using integer
-                            return this.pieces[reference];
+                            return this.shapes[reference];
                         } else if (!tetris.isNumber(reference)) {
                             //lookup using name
                             //needs escaping
-                            return this.pieces[this.names[reference]];
+                            return this.shapes[this.names[reference]];
                         } else {
                             return false;
                         }
                     },
-                    pieces: [],
+                    shapes: [],
                     names: {},
                     total: 0,
                     totalGivenProbability: 0
                 },
                 makeShape: function() {
-                    var p = tetris.pieces.getPieceProbably();
+                    var s = tetris.shapeFactory.getShapeProbably();
                     
-                    return {"width": p.dimensions.width,
-                            "height": p.dimensions.height,
-                            "blocks": p.structure,
-                            "color": p.color,
+                    return {"width": s.dimensions.width,
+                            "height": s.dimensions.height,
+                            "blocks": s.structure,
+                            "color": s.color,
                             "loc": {"x": Math.floor(tetris.grid.width/2 - 1),
-                                    "y": -p.dimensions.height},
+                                    "y": -s.dimensions.height},
                             "fall": function() {
                                 if (tetris.activeShape === null) {
                                     //add to grid
@@ -472,16 +474,16 @@ var outerTetris = (function() {
                 },
                 statistics: {
                     completedRows: [],
-                    pieceOccurences: [],
+                    shapeOccurences: [],
                     gameTime: 0,
-                    totalPieces: function() {
-                        return pieceOccurences.length;
+                    totalShapes: function() {
+                        return shapeOccurences.length;
                     },
-                    registerPiece: function(id) {
-                        pieceOccurences[pieceOccurences.length] = {"time": Date.now(), "id": id};
+                    registerShape: function(id) {
+                        shapeOccurences[shapeOccurences.length] = {"time": Date.now(), "id": id};
                     },
-                    pieceDistribution: function() {
-                        //calculate the probability with which the pieces appeared
+                    shapesDistribution: function() {
+                        //calculate the probability with which the shapes appeared
                     },
                     totalCompleteRows: function() {
                         return completedRows.length;
