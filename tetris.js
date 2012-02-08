@@ -169,11 +169,11 @@ var outerTetris = (function() {
                                         }
                                         if (colFull) {
                                             var fadeSpeed = Math.min(600, tetris.speed);
+                                            tetris.increaseScore(rowNum);
                                             $(this.selector+" .row").eq(rowNum).fadeOut(fadeSpeed, function(){
                                                 var newRow = [],
                                                     rowToRemove = $(this).prevAll().length;
                                                 $(this).remove();
-                                                tetris.score += (rowToRemove < tetris.grid.height/4) ? tetris.scoreUnit*2 : tetris.scoreUnit;
                                                                  
                                                 $(tetris.grid.selector).prepend("<div class='row'></div>");
                                                 for (var k=0; k<tetris.grid.width; k++) {
@@ -199,6 +199,34 @@ var outerTetris = (function() {
                 },
                 isNumber: function(n) {
                   return !isNaN(parseFloat(n)) && isFinite(n);
+                },
+                increaseScore: function(rowNum) {
+                    var increment = this.scoreUnit,
+                        singleColorRow = false;
+                    //Top 1/4 of grid gets extra points
+                    if (rowNum < this.grid.height/4) {
+                        console.log(this.scoreUnit + " points for " + rowNum + " less than " + (this.grid.height/4));
+                        increment += this.scoreUnit;
+                    }
+                    //Same color row gets extra points
+                    for (var i=0;i<this.grid.width;i++) {
+                        var locationColor = $(this.grid.selector + " .row").eq(rowNum).find(".col").eq(i).css('background-color');
+                        console.log(locationColor);
+                        if (singleColorRow === false){
+                            singleColorRow = locationColor;
+                        } else if (singleColorRow !== locationColor) {
+                            singleColorRow = false;
+                            break;
+                        }
+                    }
+                    if (singleColorRow !== false) {
+                        increment += this.scoreUnit;
+                        console.log(this.scoreUnit + " points for single colour row");
+                    }
+                    //Fast row filling gets extra points
+                    if (false) {
+                    }
+                    this.score += increment;
                 },
                 pieces: {
                     addPieceWithProbability: function(name, structure, color, prob) {
