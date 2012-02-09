@@ -132,6 +132,7 @@ var outerTetris = (function() {
                                      return g;
                                  },
                                 "start":function() {
+                                    tetris.statistics.gameStartTime = Date.now();
                                     tetris.makeShape().startFall();
                                     if (tetris.speed > 500) tetris.speed -= 10;
                                 },
@@ -163,16 +164,17 @@ var outerTetris = (function() {
                                     
                                     //from this y location downwards
                                     for(;rowNum<this.height;rowNum++) {
-                                        var colFull = true;
+                                        var rowFull = true;
                                         //check if a column is full
                                         for(var col=0;col<this.width;col++) {
                                             if (this.state[rowNum][col]===0) {
-                                                colFull = false;
+                                                rowFull = false;
                                                 break;
                                             }
                                         }
-                                        if (colFull) {
+                                        if (rowFull) {
                                             var fadeSpeed = Math.min(600, tetris.speed);
+                                            tetris.statistics.registerCompletedRow(rowNum);
                                             tetris.increaseScore(rowNum);
                                             $(this.selector+" .row").eq(rowNum).fadeOut(fadeSpeed, function(){
                                                 var newRow = [],
@@ -248,7 +250,6 @@ var outerTetris = (function() {
                                                            "cumulativeProb": 0};
                         
                         this.totalGivenProbability += prob;
-                        this.total++;
                         
                         //reset distributed probabilities between added shapes
                         this.calculateRelativeProbabilities();
@@ -261,9 +262,11 @@ var outerTetris = (function() {
                             }
                         }
                     },
-                    getShapeProbably: function() {
-                        var z = Math.random();
-                        return this.binarySearch(this.shapes.length, 0, z);
+                    getShapeProbabilitily: function() {
+                        var z = Math.random(),
+                            s = this.binarySearch(this.shapes.length, 0, z);
+                        tetris.statistics.registerShape(s);
+                        return this.shapes[s];
                     },
                     binarySearch: function(top, bottom, needle) {
                         var mid;
@@ -273,20 +276,20 @@ var outerTetris = (function() {
                             if (needle >= this.shapes[mid].cumulativeProb-this.shapes[mid].prob &&
                                 needle <= this.shapes[mid].cumulativeProb) {
                                 top = mid;
-                                break;
+                                bottom = mid;
                             } else if (needle < this.shapes[mid].cumulativeProb) {
                                 top = mid;
                             } else {
                                 bottom = mid;
                             }
                         }
-                        return this.shapes[top];
+                        return top; //this.shapes[top];
                     },
                     addShape: function(name, structure, color) {
                         this.addShapeWithProbability(name, structure, color, 1);
                     },
                     getShape: function(reference) {
-                        if (tetris.isNumber(reference) && reference>=0 && reference<this.total){
+                        if (tetris.isNumber(reference) && reference>=0 && reference<this.numShapes()){
                             //lookup using integer
                             return this.shapes[reference];
                         } else if (!tetris.isNumber(reference)) {
@@ -297,13 +300,15 @@ var outerTetris = (function() {
                             return false;
                         }
                     },
+                    numShapes: function() {
+                        return this.shapes.length;  
+                    },
                     shapes: [],
                     names: {},
-                    total: 0,
                     totalGivenProbability: 0
                 },
                 makeShape: function() {
-                    var s = tetris.shapeFactory.getShapeProbably();
+                    var s = tetris.shapeFactory.getShapeProbabilitily();
                     
                     return {"width": s.dimensions.width,
                             "height": s.dimensions.height,
@@ -368,6 +373,12 @@ var outerTetris = (function() {
                                     $(tetris.grid.selector+" .row").each(function(i, e) {
                                         $(this).find(".col").delay(250).fadeTo('slow', 0.5); //css('background-color', '#BBBBBB');
                                     });
+
+                                    console.log("Game Time: " + tetris.statistics.gameLength(true));
+                                    console.log(tetris.statistics.scoreRate());
+                                    console.log("Shape Probs:");
+                                    console.log(tetris.statistics.shapesDistribution());
+                                    console.log(tetris.statistics.completedRows);
                                 }
                                 //delete this;
                                 return true;
@@ -475,24 +486,63 @@ var outerTetris = (function() {
                 statistics: {
                     completedRows: [],
                     shapeOccurences: [],
-                    gameTime: 0,
-                    totalShapes: function() {
-                        return shapeOccurences.length;
+                    gameStartTime: 0,
+                    gameLength: function(units) {
+                        var seconds = Date.now() - this.gameStartTime;
+                        if (units !== null && units !== undefined) {
+                            return Math.floor(seconds / 60) + " minutes and " + (seconds % 60) + " seconds";
+                        } else {
+                            return seconds;
+                        }
+                    },
+                    totalShapesSeen: function() {
+                        return this.shapeOccurences.length;
                     },
                     registerShape: function(id) {
-                        shapeOccurences[shapeOccurences.length] = {"time": Date.now(), "id": id};
+                        this.shapeOccurences[this.shapeOccurences.length] = {"time": Date.now(), "id": id};
                     },
                     shapesDistribution: function() {
                         //calculate the probability with which the shapes appeared
+                        var shapeHits = [],
+                            i = tetris.shapeFactory.numShapes(),
+                            cumulativeProbDiff = 0;
+                        //while loop relying on falsey 0 to terminate
+                        while (i--) {
+                            shapeHits[i] = {"hits":0, "prob":0, "about": tetris.shapeFactory.shapes[i].color};
+                        }
+                        for (var j=0, max=this.shapeOccurences.length; j<max; j++) {
+                            // increment or set as 1
+                            //(shapeHits[this.shapeOccurences[j].id]++) || (shapeHits[this.shapeOccurences[j].id] = 1);
+                            
+                            // preincrement hits and recalculate prob where max is total shapes seen
+                            var id = this.shapeOccurences[j].id;
+                            shapeHits[id].prob = ++shapeHits[id].hits / max;
+                            shapeHits[id].probDiff = Math.abs(shapeHits[id].prob - tetris.shapeFactory.shapes[id].prob);
+                            cumulativeProbDiff += shapeHits[id].probDiff;
+                        }
+                        console.log("Mean Deviation from probability dist: " + (cumulativeProbDiff/tetris.shapeFactory.numShapes()));
+                        return shapeHits;
                     },
                     totalCompleteRows: function() {
-                        return completedRows.length;
+                        return this.completedRows.length;
                     },
                     registerCompletedRow: function(rowNum) {
-                        completedRows[completedRows.length] = {"time": Date.now(), "row": rowNum};
+                        this.completedRows[this.completedRows.length] = {"time": Date.now(), "row": rowNum};
                     },
                     completedRowDistribution: function() {
                         //calculate which rows "completed" the most
+                        var rowDist = [], i = tetris.grid.height;
+                        //while loop relying on falsey 0 to terminate
+                        while (i--) {
+                            rowDist[i] = 0;
+                        }
+                        for (var j=0, max=this.totalCompleteRows(); j<max; j++) {
+                            rowDist[this.completedRows[j].row]++;
+                        }
+                        return rowDist;
+                    },
+                    scoreRate: function() {
+                        return "Points/second: " + (tetris.score / tetris.statistics.gameLength());
                     }
                 },
                 output: function(msg) {
