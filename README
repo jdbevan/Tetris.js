@@ -4,6 +4,8 @@ Minified using Google Closure Compiler: http://closure-compiler.appspot.com/home
 
 Dependent on jQuery (for now)
 
+// DONE: Setup git at work in Cygwin
+
 // TODO: detect multiple pressing of z and increase speed more
 // TODO: remove jQuery dependency
 // TODO: new line at top is different colour - ie different level
