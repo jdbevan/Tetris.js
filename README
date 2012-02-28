@@ -1,0 +1,2 @@
+//TODO: Allow passing object with defaults to tetris.start();
+//TODO: settings object has: height, weight, container, speed, other things... :)
