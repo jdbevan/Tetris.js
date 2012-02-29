@@ -65,6 +65,8 @@ var outerTetris = (function() {
                             tetris.grid.reset();
                             tetris.speed = 1500;
                             tetris.score = 0;
+                            e.preventDefault();
+                            return false;
                         }
                         
                         if (tetris.activeShape !== null) {
@@ -81,21 +83,28 @@ var outerTetris = (function() {
                                 //left
                                 if (changedShape.loc.x > 0) changedShape.loc.x--;
                                 tetris.moveShapeIfNoCollision(changedShape);
-                                
+	                            e.preventDefault();
+	                            return false;
                             } else if (e.keyCode == 39) {
                                 //right
                                 if (changedShape.loc.x + changedShape.width < tetris.grid.width) changedShape.loc.x++;
                                 tetris.moveShapeIfNoCollision(changedShape);
+	                            e.preventDefault();
+	                            return false;
                                 
                             } else if (e.keyCode == 38) {
                                 //up - anticlockwise
                                 changedShape.rotate(-1);
                                 tetris.moveShapeIfNoCollision(changedShape);
+	                            e.preventDefault();
+	                            return false;
                                 
                             } else if (e.keyCode == 40) {
                                 //down - clockwise
                                 changedShape.rotate(1);
                                 tetris.moveShapeIfNoCollision(changedShape);
+	                            e.preventDefault();
+	                            return false;
                                 
                             } else if (e.keyCode == 90) {
                                 // z - drop
@@ -106,6 +115,8 @@ var outerTetris = (function() {
                                     }
                                 }
                                 tetris.moveShapeIfNoCollision(changedShape);
+	                            e.preventDefault();
+	                            return false;
                             }
                         }
                     });
