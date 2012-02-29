@@ -52,7 +52,7 @@ var outerTetris = (function() {
                     this.shapeFactory.addShapeWithProbability("L2", [[1,0,0],[1,1,1]], "purple", 0.3);
                     this.shapeFactory.addShapeWithProbability("diagonal", [[1,0],[0,1]], "black", 0.1);
                     this.shapeFactory.addShapeWithProbability("T", [[0,1,0],[1,1,1]], "orange", 0.2);
-                    this.shapeFactory.addShapeWithProbability("jagged1", [[1,1,0],[0,1,1]], "pink", 0.2);
+                    this.shapeFactory.addShapeWithProbability("jagged1", [[1,1,0],[0,1,1]], "#FF00FF", 0.2);
                     this.shapeFactory.addShapeWithProbability("jagged2", [[0,1,1],[1,1,0]], "brown", 0.2);
                 
                     $(document).keydown(function(e){
