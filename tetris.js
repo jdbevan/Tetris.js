@@ -108,9 +108,9 @@ var outerTetris = (function() {
                                 
                             } else if (e.keyCode == 90) {
                                 // z - drop
-                                var origY = changedShape.loc.y;
-                                for (changedShape.loc.y=tetris.grid.height-changedShape.height; changedShape.loc.y>origY; changedShape.loc.y--) {
-                                    if (!tetris.grid.collisionCheck(changedShape)) {
+				for (; changedShape.loc.y < tetris.grid.height - changedShape.height; changedShape.loc.y++) {
+				    if (tetris.grid.collisionCheck(changedShape)) {
+					changedShape.loc.y--;
                                         break;
                                     }
                                 }
